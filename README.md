@@ -1,17 +1,34 @@
-# memory_bootle
+# Memory Bottle
 
-A new Flutter project.
+记忆漂流瓶（Memory Bottle）
 
-## Getting Started
+一个基于 Flutter 开发的个人记忆记录应用。
 
-This project is a starting point for a Flutter application.
+## 功能
 
-A few resources to get you started if this is your first Flutter project:
+- 写下记忆
+- 查看记忆
+- 随机拾取漂流瓶
+- 时间线浏览
+- 本地数据库存储（开发中）
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## 技术栈
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Flutter
+- Dart
+
+## 当前状态
+
+MVP 开发阶段
+
+## 未来计划
+
+- SQLite 持久化
+- Android 发布
+- Windows 发布
+- 数据导出
+- 云同步
+
+## 作者
+
+unmyic
