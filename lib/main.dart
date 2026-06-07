@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -5,8 +7,12 @@ import 'services/memory_service.dart';
 import 'models/memory.dart';
 import 'pages/home_page.dart';
 void main() {
-  sqfliteFfiInit();
-  databaseFactory = databaseFactoryFfi;
+  WidgetsFlutterBinding.ensureInitialized();
+
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  }
 
   runApp(const MemoryBottleApp());
 }
