@@ -86,6 +86,64 @@ class _MemoryBottleAppState extends State<MemoryBottleApp> {
           'SimHei',
           'Arial',
         ],
+
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF8EC5FF),
+          brightness: Brightness.light,
+          primary: const Color(0xFF5BA7E8),
+          secondary: const Color(0xFF9BD7F5),
+          surface: const Color(0xFFF5FBFF),
+        ),
+
+        scaffoldBackgroundColor: const Color(0xFFF5FBFF),
+
+        appBarTheme: const AppBarTheme(
+          centerTitle: true,
+          backgroundColor: Color(0xFFF5FBFF),
+          foregroundColor: Color(0xFF243447),
+          elevation: 0,
+        ),
+
+        cardTheme: CardThemeData(
+          color: Colors.white,
+          elevation: 2,
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+        ),
+
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF5BA7E8),
+            foregroundColor: Colors.white,
+            minimumSize: const Size(120, 48),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+          ),
+        ),
+
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(
+              color: Color(0xFFD8EAF8),
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(
+              color: Color(0xFF5BA7E8),
+              width: 1.5,
+            ),
+          ),
+        ),
       ),
       home: HomePage(
         memories: memories,
