@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../models/memory.dart';
 import '../utils/date_utils.dart';
+import '../widgets/tag_text.dart';
 
 import 'memory_detail_page.dart';
 
@@ -46,9 +47,20 @@ class _BottlePageState extends State<BottlePage> {
     currentMemory = remainingMemories.removeAt(index);
   }
 
+  void _pickNextBottle() {
+    if (remainingMemories.isEmpty) {
+      return;
+    }
+
+    setState(() {
+      pickRandomMemory();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final dateText = formatDate(currentMemory.date);
+    final daysText = daysAgoText(currentMemory.date);
 
     return Scaffold(
       appBar: AppBar(
@@ -56,88 +68,235 @@ class _BottlePageState extends State<BottlePage> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(32),
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 8),
 
-                  Text(
-                    dateText,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  Text(
-                    currentMemory.content,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),   
-                  const SizedBox(height: 24),
-
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      daysAgoText(currentMemory.date),
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ),  
-                  
-                  const SizedBox(height: 12),
-
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => MemoryDetailPage(
-                              memory: currentMemory,
-                              onDeleteMemory: widget.onDeleteMemory,
-                              onUpdateMemory: widget.onUpdateMemory,
-                            ),
-                          ),
-                        ).then((deleted) {
-                          if (deleted == true) {
-                            if (remainingMemories.isNotEmpty) {
-                              setState(() {
-                                pickRandomMemory();
-                              });
-                            } else {
-                              Navigator.pop(context);
-                            }
-                          } else {
-                            setState(() {});
-                          }
-                        });
-                      },
-                      child: const Text("查看这条记忆详情"),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: remainingMemories.isEmpty
-                        ? null
-                        : () {
-                            setState(() {
-                              pickRandomMemory();
-                            });
-                          },
-                      child: Text(
-                        remainingMemories.isEmpty ? "已经没有新的漂流瓶了" : "再拾取一个",
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.85, end: 1.0),
+                duration: const Duration(milliseconds: 700),
+                curve: Curves.easeOutBack,
+                builder: (context, scale, child) {
+                  return Transform.scale(
+                    scale: scale,
+                    child: child,
+                  );
+                },
+                child: Column(
+                  children: [
+                    Container(
+                      width: 96,
+                      height: 96,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withValues(alpha: 0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.waves_outlined,
+                        size: 54,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
-                  ),   
-                ],
+
+                    const SizedBox(height: 16),
+
+                    Text(
+                      "你拾到了一段过去的记忆",
+                      textAlign: TextAlign.center,
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    Text(
+                      "它从时间的海面漂到了你面前",
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.black54,
+                          ),
+                    ),
+                  ],
+                ),
               ),
-            ),
+
+              const SizedBox(height: 28),
+
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 350),
+                switchInCurve: Curves.easeOut,
+                switchOutCurve: Curves.easeIn,
+                transitionBuilder: (child, animation) {
+                  final offsetAnimation = Tween<Offset>(
+                    begin: const Offset(0, 0.05),
+                    end: Offset.zero,
+                  ).animate(animation);
+
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: offsetAnimation,
+                      child: child,
+                    ),
+                  );
+                },
+                child: Card(
+                  key: ValueKey(
+                    currentMemory.id ??
+                        "${currentMemory.content}-${currentMemory.date}",
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(22),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.calendar_today_outlined,
+                              size: 18,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              dateText,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        TagText(tags: currentMemory.tags),
+
+                        const SizedBox(height: 18),
+
+                        Divider(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withValues(alpha: 0.18),
+                        ),
+
+                        const SizedBox(height: 18),
+
+                        Text(
+                          currentMemory.content,
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    height: 1.7,
+                                    fontSize: 17,
+                                  ),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              daysText,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MemoryDetailPage(
+                        memory: currentMemory,
+                        onDeleteMemory: widget.onDeleteMemory,
+                        onUpdateMemory: widget.onUpdateMemory,
+                      ),
+                    ),
+                  ).then((deleted) {
+                    if (deleted == true) {
+                      if (remainingMemories.isNotEmpty) {
+                        setState(() {
+                          pickRandomMemory();
+                        });
+                      } else {
+                        Navigator.pop(context);
+                      }
+                    } else {
+                      setState(() {});
+                    }
+                  });
+                },
+                icon: const Icon(Icons.open_in_new),
+                label: const Text("查看这条记忆详情"),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(120, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 14),
+
+              ElevatedButton.icon(
+                onPressed: remainingMemories.isEmpty ? null : _pickNextBottle,
+                icon: Icon(
+                  remainingMemories.isEmpty
+                      ? Icons.check_circle_outline
+                      : Icons.shuffle,
+                ),
+                label: Text(
+                  remainingMemories.isEmpty ? "已经没有新的漂流瓶了" : "再拾取一个",
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              Text(
+                "本次还剩 ${remainingMemories.length} 个可拾取的漂流瓶",
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.black45,
+                    ),
+              ),
+            ],
           ),
         ),
       ),
