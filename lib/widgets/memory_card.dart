@@ -16,17 +16,75 @@ class MemoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasTags = memory.tags.trim().isNotEmpty;
+
     return Card(
-      child: ListTile(
-        title: Text(
-          memory.content,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-        subtitle: Text(
-          memory.tags.isEmpty ? dateText : "$dateText · ${memory.tags}",
-        ),
+      margin: const EdgeInsets.only(bottom: 14),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
         onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                memory.content,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      height: 1.5,
+                      fontWeight: FontWeight.w500,
+                    ),
+              ),
+
+              const SizedBox(height: 14),
+
+              Row(
+                children: [
+                  Icon(
+                    Icons.calendar_today_outlined,
+                    size: 15,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    dateText,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.black54,
+                        ),
+                  ),
+
+                  if (hasTags) ...[
+                    const SizedBox(width: 12),
+                    Icon(
+                      Icons.sell_outlined,
+                      size: 15,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        memory.tags,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.black54,
+                            ),
+                      ),
+                    ),
+                  ] else
+                    const Spacer(),
+
+                  const Icon(
+                    Icons.chevron_right,
+                    color: Colors.black38,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
