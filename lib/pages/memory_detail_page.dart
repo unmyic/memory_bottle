@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/memory.dart';
 import '../utils/date_utils.dart';
+import '../widgets/tag_text.dart';
 
 import 'edit_memory_page.dart';
 
@@ -52,11 +53,7 @@ class _MemoryDetailPageState extends State<MemoryDetailPage> {
 
                   const SizedBox(height: 12),
 
-                  if (widget.memory.tags.isNotEmpty)
-                    Text(
-                      "标签：${widget.memory.tags}",
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
+                  TagText(tags: widget.memory.tags),
 
                   const SizedBox(height: 20),
                   Text(

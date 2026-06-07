@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-import 'database/memory_database.dart';
+import 'services/memory_service.dart';
 import 'models/memory.dart';
 import 'pages/home_page.dart';
 void main() {
@@ -19,6 +19,7 @@ class MemoryBottleApp extends StatefulWidget {
 }
 
 class _MemoryBottleAppState extends State<MemoryBottleApp> {
+  final MemoryService _memoryService = MemoryService();
   final List<Memory> memories = [];
 
   @override
@@ -28,7 +29,7 @@ class _MemoryBottleAppState extends State<MemoryBottleApp> {
   }
 
   Future<void> loadMemories() async {
-    final loadedMemories = await MemoryDatabase.getAllMemories();
+    final loadedMemories = await _memoryService.getAllMemories();
 
     setState(() {
       memories.clear();
@@ -37,7 +38,7 @@ class _MemoryBottleAppState extends State<MemoryBottleApp> {
   }
   
   Future<void> addMemory(Memory memory) async {
-    final id = await MemoryDatabase.insertMemory(memory);
+    final id = await _memoryService.addMemory(memory);
     memory.id = id;
 
     setState(() {
@@ -48,7 +49,7 @@ class _MemoryBottleAppState extends State<MemoryBottleApp> {
 
   Future<void> deleteMemory(Memory memory) async {
     if (memory.id != null) {
-      await MemoryDatabase.deleteMemory(memory.id!);
+      await _memoryService.deleteMemory(memory.id!);
     }
 
     setState(() {
@@ -66,7 +67,7 @@ class _MemoryBottleAppState extends State<MemoryBottleApp> {
     memory.date = newDate;
     memory.tags = newTags;
 
-    await MemoryDatabase.updateMemory(memory);
+    await _memoryService.updateMemory(memory);
 
     setState(() {
       memories.sort((a, b) => b.date.compareTo(a.date));

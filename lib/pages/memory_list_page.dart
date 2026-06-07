@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../models/memory.dart';
 import '../utils/date_utils.dart';
+import '../widgets/memory_card.dart';
+import '../widgets/empty_state.dart';
 
 import 'memory_detail_page.dart';
 
@@ -238,8 +240,9 @@ class _MemoryListPageState extends State<MemoryListPage> {
 
           Expanded(
             child: filteredMemories.isEmpty
-              ? Center(
-                  child: Text(emptyMessage()),
+              ? EmptyState(
+                  icon: Icons.inbox_outlined,
+                  message: emptyMessage(),
                 )
               : ListView.builder(
                   padding: const EdgeInsets.all(16),
@@ -278,30 +281,21 @@ class _MemoryListPageState extends State<MemoryListPage> {
                             ),
                           ),
 
-                        Card(
-                          child: ListTile(
-                            title: Text(
-                              memory.content,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            subtitle: Text(
-                              memory.tags.isEmpty
-                                ?dateText
-                                :"$dateText · ${memory.tags}"),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => MemoryDetailPage(
-                                    memory: memory,
-                                    onDeleteMemory: widget.onDeleteMemory,
-                                    onUpdateMemory: widget.onUpdateMemory,
-                                  ),
+                        MemoryCard(
+                          memory: memory,
+                          dateText: dateText,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MemoryDetailPage(
+                                  memory: memory,
+                                  onDeleteMemory: widget.onDeleteMemory,
+                                  onUpdateMemory: widget.onUpdateMemory,
                                 ),
-                              );
-                            },
-                          ),
+                              ),
+                            );
+                          },
                         ),
                       ],
                     );
