@@ -75,49 +75,124 @@ class _WriteMemoryPageState extends State<WriteMemoryPage> {
       appBar: AppBar(
         title: const Text("写下记忆"),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            TextField(
-              controller: _contentController,
-              maxLines: 8,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: "这一刻，你想记下什么？",
-                alignLabelWithHint: true,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Icon(
+                Icons.edit_note,
+                size: 64,
+                color: Theme.of(context).colorScheme.primary,
               ),
-            ),
 
-            const SizedBox(height: 16),
-            TextField(
-              controller: _tagsController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: "标签，例如：焦虑, 工作, 夜晚",
+              const SizedBox(height: 12),
+
+              Text(
+                "记录这一刻",
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
-            ),
 
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                Text("记忆时间：$dateText"),
-                const SizedBox(width: 20),
-                ElevatedButton(
-                  onPressed: _pickDate,
-                  child: const Text("修改日期"),
+              const SizedBox(height: 8),
+
+              Text(
+                "写下想保存的心情、事件或回忆",
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.black54,
+                    ),
+              ),
+
+              const SizedBox(height: 24),
+
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      TextField(
+                        controller: _contentController,
+                        maxLines: 9,
+                        textInputAction: TextInputAction.newline,
+                        decoration: const InputDecoration(
+                          labelText: "这一刻，你想记下什么？",
+                          hintText: "例如：今天终于完成了一个重要的小目标……",
+                          alignLabelWithHint: true,
+                        ),
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      TextField(
+                        controller: _tagsController,
+                        decoration: const InputDecoration(
+                          labelText: "标签",
+                          hintText: "例如：焦虑, 工作, 夜晚",
+                          prefixIcon: Icon(Icons.sell_outlined),
+                        ),
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.calendar_today_outlined,
+                              size: 18,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                "记忆时间：$dateText",
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: _pickDate,
+                              child: const Text("修改"),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
-            const Spacer(),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
+              ),
+
+              const SizedBox(height: 24),
+
+              ElevatedButton.icon(
                 onPressed: _saveMemory,
-                child: const Text("保存记忆"),
-              ), 
-            ),
-          ],
+                icon: const Icon(Icons.check),
+                label: const Text("保存记忆"),
+              ),
+
+              const SizedBox(height: 12),
+
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("取消"),
+              ),
+            ],
+          ),
         ),
       ),
     );
