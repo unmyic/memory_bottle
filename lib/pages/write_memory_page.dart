@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../providers/memory_provider.dart';
 import '../models/memory.dart';
 import '../utils/date_utils.dart';
 
 class WriteMemoryPage extends StatefulWidget {
-  final void Function(Memory memory) onSave;
+  final Memory? memory;
+
+  bool get isEditing => memory != null;
 
   const WriteMemoryPage({
     super.key,
-    required this.onSave,
+    this.memory,
   });
 
   @override
@@ -16,10 +20,22 @@ class WriteMemoryPage extends StatefulWidget {
 }
 
 class _WriteMemoryPageState extends State<WriteMemoryPage> {
-  final TextEditingController _contentController = TextEditingController();
-  final TextEditingController _tagsController = TextEditingController();
+  late final TextEditingController _contentController;
+  late final TextEditingController _tagsController;
+  late DateTime _selectedDate;
 
-  DateTime _selectedDate = DateTime.now();
+  @override
+  void initState() {
+    super.initState();
+
+    _contentController = TextEditingController(
+      text: widget.isEditing ? widget.memory!.content : '',
+    );
+    _tagsController = TextEditingController(
+      text: widget.isEditing ? widget.memory!.tags : '',
+    );
+    _selectedDate = widget.isEditing ? widget.memory!.date : DateTime.now();
+  }
 
   @override
   void dispose() {
@@ -49,20 +65,20 @@ class _WriteMemoryPageState extends State<WriteMemoryPage> {
 
     if (content.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("请先写下一些内容"),
-        ),
+        const SnackBar(content: Text("请先写下一些内容")),
       );
       return;
     }
 
-    widget.onSave(
-      Memory(
-        content: content,
-        date: _selectedDate,
-        tags: tags,
-      ),
-    );
+    final provider = context.read<MemoryProvider>();
+
+    if (widget.isEditing) {
+      provider.updateMemory(widget.memory!, content, _selectedDate, tags);
+    } else {
+      provider.addMemory(
+        Memory(content: content, date: _selectedDate, tags: tags),
+      );
+    }
 
     Navigator.pop(context);
   }
@@ -70,11 +86,16 @@ class _WriteMemoryPageState extends State<WriteMemoryPage> {
   @override
   Widget build(BuildContext context) {
     final dateText = formatDate(_selectedDate);
+    final isEditing = widget.isEditing;
+
+    final icon = isEditing ? Icons.edit : Icons.edit_note;
+    final title = isEditing ? '编辑记忆' : '写下记忆';
+    final subtitle = isEditing
+        ? '你可以更新内容、标签或记忆发生的时间'
+        : '写下想保存的心情、事件或回忆';
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("写下记忆"),
-      ),
+      appBar: AppBar(title: Text(title)),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -82,33 +103,25 @@ class _WriteMemoryPageState extends State<WriteMemoryPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Icon(
-                Icons.edit_note,
+                icon,
                 size: 64,
                 color: Theme.of(context).colorScheme.primary,
               ),
-
               const SizedBox(height: 12),
-
               Text(
-                "记录这一刻",
+                isEditing ? '修改这段记忆' : '记录这一刻',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
               ),
-
               const SizedBox(height: 8),
-
               Text(
-                "写下想保存的心情、事件或回忆",
+                subtitle,
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.black54,
-                    ),
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
-
               const SizedBox(height: 24),
-
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(20),
@@ -119,30 +132,27 @@ class _WriteMemoryPageState extends State<WriteMemoryPage> {
                         controller: _contentController,
                         maxLines: 9,
                         textInputAction: TextInputAction.newline,
-                        decoration: const InputDecoration(
-                          labelText: "这一刻，你想记下什么？",
-                          hintText: "例如：今天终于完成了一个重要的小目标……",
+                        decoration: InputDecoration(
+                          labelText: isEditing ? '记忆内容' : '这一刻，你想记下什么？',
+                          hintText: isEditing
+                              ? '修改你想保存的记忆内容……'
+                              : '例如：今天终于完成了一个重要的小目标……',
                           alignLabelWithHint: true,
                         ),
                       ),
-
                       const SizedBox(height: 18),
-
                       TextField(
                         controller: _tagsController,
                         decoration: const InputDecoration(
-                          labelText: "标签",
-                          hintText: "例如：焦虑, 工作, 夜晚",
+                          labelText: '标签',
+                          hintText: '例如：焦虑, 工作, 夜晚',
                           prefixIcon: Icon(Icons.sell_outlined),
                         ),
                       ),
-
                       const SizedBox(height: 18),
-
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 12,
+                          horizontal: 14, vertical: 12,
                         ),
                         decoration: BoxDecoration(
                           color: Theme.of(context)
@@ -161,13 +171,13 @@ class _WriteMemoryPageState extends State<WriteMemoryPage> {
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
-                                "记忆时间：$dateText",
+                                '记忆时间：$dateText',
                                 style: Theme.of(context).textTheme.bodyMedium,
                               ),
                             ),
                             TextButton(
                               onPressed: _pickDate,
-                              child: const Text("修改"),
+                              child: const Text('修改'),
                             ),
                           ],
                         ),
@@ -176,20 +186,16 @@ class _WriteMemoryPageState extends State<WriteMemoryPage> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 24),
-
               ElevatedButton.icon(
                 onPressed: _saveMemory,
                 icon: const Icon(Icons.check),
-                label: const Text("保存记忆"),
+                label: Text(isEditing ? '保存修改' : '保存记忆'),
               ),
-
               const SizedBox(height: 12),
-
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text("取消"),
+                child: const Text('取消'),
               ),
             ],
           ),

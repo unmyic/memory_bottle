@@ -1,5 +1,9 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/memory_provider.dart';
 import '../models/memory.dart';
 import '../utils/date_utils.dart';
 import '../widgets/memory_card.dart';
@@ -8,22 +12,7 @@ import '../widgets/empty_state.dart';
 import 'memory_detail_page.dart';
 
 class MemoryListPage extends StatefulWidget {
-  final List<Memory> memories;
-  final void Function(Memory memory) onDeleteMemory;
-  final void Function(
-    Memory memory,
-    String newContent, 
-    DateTime newDate,
-    String newTags,
-  ) 
-    onUpdateMemory;
-
-  const MemoryListPage({
-    super.key,
-    required this.memories,
-    required this.onDeleteMemory,
-    required this.onUpdateMemory,
-  });
+  const MemoryListPage({super.key});
 
   @override
   State<MemoryListPage> createState() => _MemoryListPageState();
@@ -33,6 +22,13 @@ class _MemoryListPageState extends State<MemoryListPage> {
   String searchText = "";
   String filterMode = "全部";
   String selectedTag = "";
+  Timer? _debounceTimer;
+
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    super.dispose();
+  }
 
   bool matchFilter(Memory memory) {
     if (selectedTag.isNotEmpty) {
@@ -42,89 +38,49 @@ class _MemoryListPageState extends State<MemoryListPage> {
           .where((tag) => tag.isNotEmpty)
           .toList();
 
-      if (!tagList.contains(selectedTag)) {
-        return false;
-      }
+      if (!tagList.contains(selectedTag)) return false;
     }
 
     final now = DateTime.now();
     final memoryDate = memory.date;
 
-    if (filterMode == "全部") {
-      return true;
-    }
-
+    if (filterMode == "全部") return true;
     if (filterMode == "今天") {
       return memoryDate.year == now.year &&
           memoryDate.month == now.month &&
           memoryDate.day == now.day;
     }
-
     if (filterMode == "本月") {
-      return memoryDate.year == now.year &&
-          memoryDate.month == now.month;
+      return memoryDate.year == now.year && memoryDate.month == now.month;
     }
-
-    if (filterMode == "今年") {
-      return memoryDate.year == now.year;
-    }
-
+    if (filterMode == "今年") return memoryDate.year == now.year;
     if (filterMode == "本季") {
       return memoryDate.year == now.year &&
           seasonText(memoryDate) == seasonText(now);
     }
-
     return true;
   }
 
   String emptyMessage() {
     final keyword = searchText.trim();
+    final provider = context.read<MemoryProvider>();
 
-    if (widget.memories.isEmpty) {
-      return "还没有任何记忆";
-    }
-
-    if (keyword.isNotEmpty) {
-      return "没有找到包含“$keyword”的记忆";
-    }
-
-    if (filterMode == "今天") {
-      return "今天还没有记忆";
-    }
-
-    if (filterMode == "本月") {
-      return "本月还没有记忆";
-    }
-
-    if (filterMode == "本季") {
-      return "本季还没有记忆";
-    }
-
-    if (filterMode == "今年") {
-      return "今年还没有记忆";
-    }
-
+    if (provider.memories.isEmpty) return "还没有任何记忆";
+    if (keyword.isNotEmpty) return "没有找到包含「$keyword」的记忆";
+    if (filterMode == "今天") return "今天还没有记忆";
+    if (filterMode == "本月") return "本月还没有记忆";
+    if (filterMode == "本季") return "本季还没有记忆";
+    if (filterMode == "今年") return "今年还没有记忆";
     return "没有找到相关记忆";
   }
 
-  @override
-  Widget build(BuildContext context) {
+  List<Memory> _filteredMemories(MemoryProvider provider) {
     final keyword = searchText.trim();
+    final memories = provider.memories;
 
-    final allTags = widget.memories
-      .expand((memory) => memory.tags.split(","))
-      .map((tag) => tag.trim())
-      .where((tag) => tag.isNotEmpty)
-      .toSet()
-      .toList();
-
-    final filteredMemories = widget.memories.where((memory) {
-      if (!matchFilter(memory)) {
-        return false;
-      }
-      if (keyword.isEmpty) {
-        return true;
-      }
+    return memories.where((memory) {
+      if (!matchFilter(memory)) return false;
+      if (keyword.isEmpty) return true;
 
       final dateText = formatDate(memory.date);
       final groupText = monthGroupTitle(memory.date);
@@ -137,7 +93,6 @@ class _MemoryListPageState extends State<MemoryListPage> {
 
       final matchesContent = memory.content.contains(keyword);
       final matchesTags = memory.tags.contains(keyword);
-
       final matchesTime = !isTooBroadTimeKeyword &&
           (dateText.contains(keyword) ||
               groupText.contains(keyword) ||
@@ -147,6 +102,13 @@ class _MemoryListPageState extends State<MemoryListPage> {
 
       return matchesContent || matchesTags || matchesTime;
     }).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<MemoryProvider>();
+    final allTags = provider.allTags;
+    final filteredMemories = _filteredMemories(provider);
 
     return Scaffold(
       appBar: AppBar(
@@ -163,8 +125,11 @@ class _MemoryListPageState extends State<MemoryListPage> {
                 prefixIcon: Icon(Icons.search),
               ),
               onChanged: (value) {
-                setState(() {
-                  searchText = value;
+                _debounceTimer?.cancel();
+                _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+                  setState(() {
+                    searchText = value;
+                  });
                 });
               },
             ),
@@ -175,11 +140,7 @@ class _MemoryListPageState extends State<MemoryListPage> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                "全部",
-                "今天",
-                "本月",
-                "本季",
-                "今年",
+                "全部", "今天", "本月", "本季", "今年",
               ].map((mode) {
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
@@ -235,72 +196,75 @@ class _MemoryListPageState extends State<MemoryListPage> {
               ),
             ),
 
-          if (allTags.isNotEmpty)
-            const SizedBox(height: 8),
+          if (allTags.isNotEmpty) const SizedBox(height: 8),
 
           Expanded(
             child: filteredMemories.isEmpty
-              ? EmptyState(
-                  icon: Icons.inbox_outlined,
-                  message: emptyMessage(),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: filteredMemories.length,
-                  itemBuilder: (context, index) {
-                    final memory = filteredMemories[index];
-                    final dateText = formatDate(memory.date);
+                ? EmptyState(
+                    icon: Icons.inbox_outlined,
+                    message: emptyMessage(),
+                  )
+                : RefreshIndicator(
+                    onRefresh: provider.loadMemories,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: filteredMemories.length,
+                      itemBuilder: (context, index) {
+                        final memory = filteredMemories[index];
+                        final dateText = formatDate(memory.date);
 
-                    String? groupTitle;
+                        String? groupTitle;
+                        if (index == 0) {
+                          groupTitle = monthGroupTitle(memory.date);
+                        } else {
+                          final previousMemory = filteredMemories[index - 1];
+                          final currentGroup = monthGroupTitle(memory.date);
+                          final previousGroup =
+                              monthGroupTitle(previousMemory.date);
+                          if (currentGroup != previousGroup) {
+                            groupTitle = currentGroup;
+                          }
+                        }
 
-                    if (index == 0) {
-                      groupTitle = monthGroupTitle(memory.date);
-                    } else {
-                      final previousMemory = filteredMemories[index - 1];
-                      final currentGroup = monthGroupTitle(memory.date);
-                      final previousGroup = monthGroupTitle(previousMemory.date);
-
-                      if (currentGroup != previousGroup) {
-                        groupTitle = currentGroup;
-                      }
-                    }
-
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (groupTitle != null)
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              left: 8,
-                              top: 16,
-                              bottom: 8,
-                            ),
-                            child: Text(
-                              groupTitle,
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                          ),
-
-                        MemoryCard(
-                          memory: memory,
-                          dateText: dateText,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => MemoryDetailPage(
-                                  memory: memory,
-                                  onDeleteMemory: widget.onDeleteMemory,
-                                  onUpdateMemory: widget.onUpdateMemory,
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (groupTitle != null)
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 8, top: 16, bottom: 8,
+                                ),
+                                child: Text(
+                                  groupTitle,
+                                  style: Theme.of(context).textTheme.titleMedium,
                                 ),
                               ),
-                            );
-                          },
-                        ),
-                      ],
-                    );
-              },
-            ),
+                            MemoryCard(
+                              memory: memory,
+                              dateText: dateText,
+                              onTap: () {
+                                Navigator.push<bool>(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => MemoryDetailPage(
+                                      memory: memory,
+                                    ),
+                                  ),
+                                ).then((deleted) {
+                                  if (!context.mounted) return;
+                                  if (deleted == true) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('记忆已删除')),
+                                    );
+                                  }
+                                });
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
           ),
         ],
       ),

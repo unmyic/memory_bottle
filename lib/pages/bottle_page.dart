@@ -4,26 +4,16 @@ import 'package:flutter/material.dart';
 
 import '../models/memory.dart';
 import '../utils/date_utils.dart';
-import '../widgets/tag_text.dart';
+import '../widgets/memory_content_card.dart';
 
 import 'memory_detail_page.dart';
 
 class BottlePage extends StatefulWidget {
   final List<Memory> memories;
 
-  final void Function(Memory memory) onDeleteMemory;
-  final void Function(
-    Memory memory,
-    String newContent,
-    DateTime newDate,
-    String newTags,
-  ) onUpdateMemory;
-
   const BottlePage({
     super.key,
     required this.memories,
-    required this.onDeleteMemory,
-    required this.onUpdateMemory,
   });
 
   @override
@@ -48,10 +38,7 @@ class _BottlePageState extends State<BottlePage> {
   }
 
   void _pickNextBottle() {
-    if (remainingMemories.isEmpty) {
-      return;
-    }
-
+    if (remainingMemories.isEmpty) return;
     setState(() {
       pickRandomMemory();
     });
@@ -79,10 +66,7 @@ class _BottlePageState extends State<BottlePage> {
                 duration: const Duration(milliseconds: 700),
                 curve: Curves.easeOutBack,
                 builder: (context, scale, child) {
-                  return Transform.scale(
-                    scale: scale,
-                    child: child,
-                  );
+                  return Transform.scale(scale: scale, child: child);
                 },
                 child: Column(
                   children: [
@@ -102,26 +86,20 @@ class _BottlePageState extends State<BottlePage> {
                         color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
-
                     const SizedBox(height: 16),
-
                     Text(
                       "你拾到了一段过去的记忆",
                       textAlign: TextAlign.center,
-                      style:
-                          Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
-
                     const SizedBox(height: 8),
-
                     Text(
                       "它从时间的海面漂到了你面前",
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.black54,
-                          ),
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ],
                 ),
@@ -138,7 +116,6 @@ class _BottlePageState extends State<BottlePage> {
                     begin: const Offset(0, 0.05),
                     end: Offset.zero,
                   ).animate(animation);
-
                   return FadeTransition(
                     opacity: animation,
                     child: SlideTransition(
@@ -147,90 +124,37 @@ class _BottlePageState extends State<BottlePage> {
                     ),
                   );
                 },
-                child: Card(
-                  key: ValueKey(
-                    currentMemory.id ??
-                        "${currentMemory.content}-${currentMemory.date}",
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(22),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.calendar_today_outlined,
-                              size: 18,
+                child: Hero(
+                  tag: 'memory-${currentMemory.id}',
+                  child: MemoryContentCard(
+                    key: ValueKey(
+                      currentMemory.id ??
+                          "${currentMemory.content}-${currentMemory.date}",
+                    ),
+                    memory: currentMemory,
+                    dateText: dateText,
+                    trailing: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        daysText,
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(
                               color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.w600,
                             ),
-                            const SizedBox(width: 8),
-                            Text(
-                              dateText,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 12),
-
-                        TagText(tags: currentMemory.tags),
-
-                        const SizedBox(height: 18),
-
-                        Divider(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .primary
-                              .withValues(alpha: 0.18),
-                        ),
-
-                        const SizedBox(height: 18),
-
-                        Text(
-                          currentMemory.content,
-                          style:
-                              Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    height: 1.7,
-                                    fontSize: 17,
-                                  ),
-                        ),
-
-                        const SizedBox(height: 24),
-
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .primary
-                                  .withValues(alpha: 0.08),
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            child: Text(
-                              daysText,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
@@ -243,13 +167,12 @@ class _BottlePageState extends State<BottlePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => MemoryDetailPage(
+                      builder: (_) => MemoryDetailPage(
                         memory: currentMemory,
-                        onDeleteMemory: widget.onDeleteMemory,
-                        onUpdateMemory: widget.onUpdateMemory,
                       ),
                     ),
                   ).then((deleted) {
+                    if (!context.mounted) return;
                     if (deleted == true) {
                       if (remainingMemories.isNotEmpty) {
                         setState(() {
@@ -292,9 +215,7 @@ class _BottlePageState extends State<BottlePage> {
               Text(
                 "本次还剩 ${remainingMemories.length} 个可拾取的漂流瓶",
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.black45,
-                    ),
+                style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
           ),

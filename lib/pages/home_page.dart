@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 
-import '../models/memory.dart';
+import '../providers/memory_provider.dart';
+import '../providers/settings_provider.dart';
 import '../utils/date_utils.dart';
 
 import 'write_memory_page.dart';
@@ -8,27 +11,12 @@ import 'memory_list_page.dart';
 import 'bottle_page.dart';
 
 class HomePage extends StatelessWidget {
-  final List<Memory> memories;
-  final Function(Memory) onAddMemory;
-  final void Function(Memory memory) onDeleteMemory;
-  final void Function(
-    Memory memory,
-    String newContent,
-    DateTime newDate,
-    String newTags,
-  )
-  onUpdateMemory;
-
-  const HomePage({
-    super.key,
-    required this.memories,
-    required this.onAddMemory,
-    required this.onDeleteMemory,
-    required this.onUpdateMemory,
-  });
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<MemoryProvider>();
+    final memories = provider.memories;
     final totalCount = memories.length;
     final earliestMemory = memories.isEmpty ? null : memories.last;
     final latestMemory = memories.isEmpty ? null : memories.first;
@@ -42,13 +30,24 @@ class HomePage extends StatelessWidget {
         memory.date.month,
         memory.date.day,
       );
-
       return memoryDay.isBefore(today);
     }).length;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text("记忆漂流瓶"),
+        actions: [
+          IconButton(
+            icon: Icon(context.watch<SettingsProvider>().themeIcon),
+            tooltip: context.watch<SettingsProvider>().themeLabel,
+            onPressed: () => context.read<SettingsProvider>().toggleTheme(),
+          ),
+          IconButton(
+            icon: const Icon(Icons.ios_share),
+            tooltip: '导出记忆',
+            onPressed: () => _exportMemories(context),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -63,24 +62,12 @@ class HomePage extends StatelessWidget {
               color: Theme.of(context).colorScheme.primary,
             ),
 
-            // const SizedBox(height: 12),
-
-            // Text(
-            //   "记忆漂流瓶",
-            //   textAlign: TextAlign.center,
-            //   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            //         fontWeight: FontWeight.bold,
-            //       ),
-            // ),
-
             const SizedBox(height: 8),
 
             Text(
               "如果连你也忘了",
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.black54,
-                  ),
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
 
             const SizedBox(height: 30),
@@ -140,9 +127,7 @@ class HomePage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => WriteMemoryPage(
-                      onSave: onAddMemory,
-                    ),
+                    builder: (_) => const WriteMemoryPage(),
                   ),
                 );
               },
@@ -157,11 +142,7 @@ class HomePage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => MemoryListPage(
-                      memories: memories,
-                      onDeleteMemory: onDeleteMemory,
-                      onUpdateMemory: onUpdateMemory,
-                    ),
+                    builder: (_) => const MemoryListPage(),
                   ),
                 );
               },
@@ -184,7 +165,6 @@ class HomePage extends StatelessWidget {
                           memory.date.month,
                           memory.date.day,
                         );
-
                         return memoryDay.isBefore(today);
                       }).toList();
 
@@ -200,10 +180,8 @@ class HomePage extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => BottlePage(
+                          builder: (_) => BottlePage(
                             memories: pastMemories,
-                            onDeleteMemory: onDeleteMemory,
-                            onUpdateMemory: onUpdateMemory,
                           ),
                         ),
                       );
@@ -217,5 +195,11 @@ class HomePage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _exportMemories(BuildContext context) {
+    final provider = context.read<MemoryProvider>();
+    final json = provider.exportToJson();
+    Share.share(json, subject: '记忆漂流瓶 - 数据导出');
   }
 }
