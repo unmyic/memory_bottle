@@ -53,8 +53,10 @@ class MemoryBottleApp extends StatelessWidget {
             title: '记忆漂流瓶',
             debugShowCheckedModeBanner: false,
             themeMode: settingsProvider.themeMode,
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
+            theme: AppTheme.buildTheme(
+                Brightness.light, settingsProvider.currentFont),
+            darkTheme: AppTheme.buildTheme(
+                Brightness.dark, settingsProvider.currentFont),
             home: const HomePage(),
           );
         },

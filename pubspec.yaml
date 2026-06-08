@@ -35,7 +35,7 @@ dependencies:
   sqflite_common_ffi: ^2.4.1
   path: ^1.9.1
   provider: ^6.1.2
-  share_plus: ^10.1.4
+  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:
@@ -59,10 +59,28 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  fonts:
+    - family: SanJiXingKai
+      fonts:
+        - asset: assets/fonts/三极行楷简体-粗.ttf
+    - family: JiZiXingKai
+      fonts:
+        - asset: assets/fonts/极字经典行楷简繁-闪(GEETYPE-XingKaiGBT-Flash).ttf
+    - family: HuiWenZhengKai
+      fonts:
+        - asset: assets/fonts/汇文正楷v1.001.ttf
+    - family: YanShiXiaXingKai
+      fonts:
+        - asset: assets/fonts/演示夏行楷.ttf
+    - family: YuWeiXingShu
+      fonts:
+        - asset: assets/fonts/禹卫书法行书简体（新优化版）.ttf
+    - family: ZCOOLQingKeHuangYou
+      fonts:
+        - asset: assets/fonts/站酷庆科黄油体.ttf
+    - family: ZCOOLKuaiLeTi
+      fonts:
+        - asset: assets/fonts/站酷快乐体（开源版）推荐.ttf
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

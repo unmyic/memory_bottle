@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../providers/memory_provider.dart';
-import '../providers/settings_provider.dart';
+import '../widgets/settings_sheet.dart';
 import '../utils/date_utils.dart';
 
 import 'write_memory_page.dart';
@@ -38,9 +38,9 @@ class HomePage extends StatelessWidget {
         title: const Text("记忆漂流瓶"),
         actions: [
           IconButton(
-            icon: Icon(context.watch<SettingsProvider>().themeIcon),
-            tooltip: context.watch<SettingsProvider>().themeLabel,
-            onPressed: () => context.read<SettingsProvider>().toggleTheme(),
+            icon: const Icon(Icons.tune),
+            tooltip: '设置',
+            onPressed: () => showSettingsSheet(context),
           ),
           IconButton(
             icon: const Icon(Icons.ios_share),
@@ -200,6 +200,13 @@ class HomePage extends StatelessWidget {
   void _exportMemories(BuildContext context) {
     final provider = context.read<MemoryProvider>();
     final json = provider.exportToJson();
-    Share.share(json, subject: '记忆漂流瓶 - 数据导出');
+    Clipboard.setData(ClipboardData(text: json));
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('已复制 ${provider.memories.length} 条记忆到剪贴板'),
+        ),
+      );
+    }
   }
 }

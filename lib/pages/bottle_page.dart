@@ -39,9 +39,8 @@ class _BottlePageState extends State<BottlePage> {
 
   void _pickNextBottle() {
     if (remainingMemories.isEmpty) return;
-    setState(() {
-      pickRandomMemory();
-    });
+    pickRandomMemory();
+    setState(() {});
   }
 
   @override
@@ -135,8 +134,7 @@ class _BottlePageState extends State<BottlePage> {
                     dateText: dateText,
                     trailing: Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
+                        horizontal: 12, vertical: 6,
                       ),
                       decoration: BoxDecoration(
                         color: Theme.of(context)
@@ -199,14 +197,17 @@ class _BottlePageState extends State<BottlePage> {
               const SizedBox(height: 14),
 
               ElevatedButton.icon(
-                onPressed: remainingMemories.isEmpty ? null : _pickNextBottle,
+                onPressed:
+                    remainingMemories.isEmpty ? null : _pickNextBottle,
                 icon: Icon(
                   remainingMemories.isEmpty
                       ? Icons.check_circle_outline
                       : Icons.shuffle,
                 ),
                 label: Text(
-                  remainingMemories.isEmpty ? "已经没有新的漂流瓶了" : "再拾取一个",
+                  remainingMemories.isEmpty
+                      ? "已经没有新的漂流瓶了"
+                      : "再拾取一个",
                 ),
               ),
 
