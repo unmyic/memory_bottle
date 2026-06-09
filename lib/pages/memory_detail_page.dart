@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/memory_provider.dart';
 import '../models/memory.dart';
+import '../models/attachment.dart';
 import '../utils/date_utils.dart';
 import '../widgets/memory_content_card.dart';
 
@@ -11,59 +12,61 @@ import 'write_memory_page.dart';
 class MemoryDetailPage extends StatefulWidget {
   final Memory memory;
 
-  const MemoryDetailPage({
-    super.key,
-    required this.memory,
-  });
+  const MemoryDetailPage({super.key, required this.memory});
 
   @override
   State<MemoryDetailPage> createState() => _MemoryDetailPageState();
 }
 
 class _MemoryDetailPageState extends State<MemoryDetailPage> {
+  List<Attachment>? _attachments;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAttachments();
+  }
+
+  void _loadAttachments() async {
+    if (widget.memory.id == null) return;
+    final attachments =
+        await context.read<MemoryProvider>().getAttachments(widget.memory.id!);
+    if (mounted) setState(() => _attachments = attachments);
+  }
+
   @override
   Widget build(BuildContext context) {
     final dateText = formatDate(widget.memory.date);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("记忆详情"),
-      ),
+      appBar: AppBar(title: const Text("记忆详情")),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Hero(
-                tag: 'memory-${widget.memory.id}',
-                child: MemoryContentCard(
-                  memory: widget.memory,
-                  dateText: dateText,
-                ),
+              MemoryContentCard(
+                memory: widget.memory,
+                dateText: dateText,
+                attachments: _attachments,
               ),
-
               const SizedBox(height: 24),
-
               ElevatedButton.icon(
                 onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => WriteMemoryPage(
-                        memory: widget.memory,
-                      ),
+                      builder: (_) => WriteMemoryPage(memory: widget.memory),
                     ),
                   ).then((_) {
-                    setState(() {});
+                    _loadAttachments();
                   });
                 },
                 icon: const Icon(Icons.edit_note),
                 label: const Text("编辑这条记忆"),
               ),
-
               const SizedBox(height: 14),
-
               OutlinedButton.icon(
                 onPressed: () {
                   showDialog(
@@ -85,8 +88,7 @@ class _MemoryDetailPageState extends State<MemoryDetailPage> {
                             Navigator.pop(context, true);
                           },
                           style: TextButton.styleFrom(
-                            foregroundColor: Colors.red,
-                          ),
+                              foregroundColor: Colors.red),
                           child: const Text("删除"),
                         ),
                       ],
@@ -100,8 +102,7 @@ class _MemoryDetailPageState extends State<MemoryDetailPage> {
                   side: const BorderSide(color: Colors.red),
                   minimumSize: const Size(120, 48),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
+                      borderRadius: BorderRadius.circular(14)),
                 ),
               ),
             ],

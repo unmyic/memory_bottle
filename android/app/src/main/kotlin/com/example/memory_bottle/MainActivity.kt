@@ -1,4 +1,4 @@
-package com.example.memory_bootle
+package com.example.memory_bottle
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -5,8 +5,8 @@ plugins {
 }
 
 android {
-    namespace = "com.example.memory_bootle"
-    compileSdk = flutter.compileSdkVersion
+    namespace = "com.example.memory_bottle"
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -16,7 +16,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.memory_bootle"
+        applicationId = "com.example.memory_bottle"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

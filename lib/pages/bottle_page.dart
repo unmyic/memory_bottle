@@ -1,8 +1,11 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../models/memory.dart';
+import '../models/attachment.dart';
+import '../providers/memory_provider.dart';
 import '../utils/date_utils.dart';
 import '../widgets/memory_content_card.dart';
 
@@ -23,12 +26,14 @@ class BottlePage extends StatefulWidget {
 class _BottlePageState extends State<BottlePage> {
   late Memory currentMemory;
   late List<Memory> remainingMemories;
+  List<Attachment>? _attachments;
 
   @override
   void initState() {
     super.initState();
     remainingMemories = List.from(widget.memories);
     pickRandomMemory();
+    _loadAttachments();
   }
 
   void pickRandomMemory() {
@@ -40,7 +45,16 @@ class _BottlePageState extends State<BottlePage> {
   void _pickNextBottle() {
     if (remainingMemories.isEmpty) return;
     pickRandomMemory();
+    _attachments = null;
     setState(() {});
+    _loadAttachments();
+  }
+
+  void _loadAttachments() async {
+    if (currentMemory.id == null) return;
+    final attachments =
+        await context.read<MemoryProvider>().getAttachments(currentMemory.id!);
+    if (mounted) setState(() => _attachments = attachments);
   }
 
   @override
@@ -123,15 +137,14 @@ class _BottlePageState extends State<BottlePage> {
                     ),
                   );
                 },
-                child: Hero(
-                  tag: 'memory-${currentMemory.id}',
-                  child: MemoryContentCard(
+                child: MemoryContentCard(
                     key: ValueKey(
                       currentMemory.id ??
                           "${currentMemory.content}-${currentMemory.date}",
                     ),
                     memory: currentMemory,
                     dateText: dateText,
+                    attachments: _attachments,
                     trailing: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 6,
@@ -156,7 +169,6 @@ class _BottlePageState extends State<BottlePage> {
                     ),
                   ),
                 ),
-              ),
 
               const SizedBox(height: 24),
 

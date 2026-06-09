@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FontOption {
   final String name;
@@ -99,6 +100,45 @@ class SettingsProvider extends ChangeNotifier {
   FontOption get currentFont =>
       availableFonts.firstWhere((f) => f.name == _fontName);
 
+  static const _keyThemeMode = 'theme_mode';
+  static const _keyFontName = 'font_name';
+
+  /// 从 SharedPreferences 加载已保存的设置
+  Future<void> load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedTheme = prefs.getString(_keyThemeMode);
+    if (savedTheme != null) {
+      switch (savedTheme) {
+        case 'light':
+          _themeMode = ThemeMode.light;
+        case 'dark':
+          _themeMode = ThemeMode.dark;
+        case 'system':
+          _themeMode = ThemeMode.system;
+      }
+    }
+    final savedFont = prefs.getString(_keyFontName);
+    if (savedFont != null && availableFonts.any((f) => f.name == savedFont)) {
+      _fontName = savedFont;
+    }
+    notifyListeners();
+  }
+
+  Future<void> _save() async {
+    final prefs = await SharedPreferences.getInstance();
+    String modeStr;
+    switch (_themeMode) {
+      case ThemeMode.light:
+        modeStr = 'light';
+      case ThemeMode.dark:
+        modeStr = 'dark';
+      case ThemeMode.system:
+        modeStr = 'system';
+    }
+    await prefs.setString(_keyThemeMode, modeStr);
+    await prefs.setString(_keyFontName, _fontName);
+  }
+
   void toggleTheme() {
     switch (_themeMode) {
       case ThemeMode.system:
@@ -108,11 +148,19 @@ class SettingsProvider extends ChangeNotifier {
       case ThemeMode.light:
         _themeMode = ThemeMode.system;
     }
+    _save();
+    notifyListeners();
+  }
+
+  void setThemeMode(ThemeMode mode) {
+    _themeMode = mode;
+    _save();
     notifyListeners();
   }
 
   void setFont(String name) {
     _fontName = name;
+    _save();
     notifyListeners();
   }
 }

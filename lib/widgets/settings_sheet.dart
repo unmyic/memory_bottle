@@ -43,7 +43,9 @@ class SettingsSheet extends StatelessWidget {
               // ---- 主题模式 ----
               Text('主题模式', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 10),
-              Row(
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
                 children: ThemeMode.values.map((mode) {
                   final isSelected = settings.themeMode == mode;
                   final (icon, label) = switch (mode) {
@@ -51,22 +53,17 @@ class SettingsSheet extends StatelessWidget {
                     ThemeMode.light => (Icons.light_mode, '浅色'),
                     ThemeMode.dark => (Icons.dark_mode, '深色'),
                   };
-                  return Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: ChoiceChip(
-                        selected: isSelected,
-                        label: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(icon, size: 16),
-                            const SizedBox(width: 6),
-                            Text(label),
-                          ],
-                        ),
-                        onSelected: (_) => _setThemeMode(context, mode),
-                      ),
+                  return ChoiceChip(
+                    selected: isSelected,
+                    label: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(icon, size: 16),
+                        const SizedBox(width: 6),
+                        Text(label),
+                      ],
                     ),
+                    onSelected: (_) => _setThemeMode(context, mode),
                   );
                 }).toList(),
               ),
@@ -85,10 +82,7 @@ class SettingsSheet extends StatelessWidget {
   }
 
   void _setThemeMode(BuildContext context, ThemeMode mode) {
-    final settings = context.read<SettingsProvider>();
-    while (settings.themeMode != mode) {
-      settings.toggleTheme();
-    }
+    context.read<SettingsProvider>().setThemeMode(mode);
   }
 }
 

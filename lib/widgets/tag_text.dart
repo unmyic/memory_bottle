@@ -18,6 +18,8 @@ class TagText extends StatelessWidget {
 
     return Text(
       '$prefix$tags',
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
       style: Theme.of(context).textTheme.bodyMedium,
     );
   }

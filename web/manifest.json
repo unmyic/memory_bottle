@@ -1,6 +1,6 @@
 {
-    "name": "memory_bootle",
-    "short_name": "memory_bootle",
+    "name": "memory_bottle",
+    "short_name": "memory_bottle",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

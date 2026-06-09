@@ -1,36 +1,81 @@
-# 更新日志
+# Changelog
 
-## v1.1.0 (2026-06-08)
-
-### 新增
-
-- **暗色模式**：支持浅色 / 深色 / 跟随系统三种主题模式，首页 AppBar 一键切换
-- **Hero 动画**：列表卡片到详情页的平滑过渡动画
-- **数据导出**：点击首页分享按钮，一键导出所有记忆为 JSON 并分享到其他应用
-- **下拉刷新**：记忆列表页支持下拉重新加载
-- **删除确认**：删除记忆后返回列表时显示「记忆已删除」提示
-
-### 改进
-
-- 使用 **Provider** 重构状态管理，代码结构更清晰，页面间不再逐层传递参数
-- 合并「写下记忆」和「编辑记忆」页面，消除约 120 行重复代码
-- 抽取 `MemoryContentCard` 共享组件，详情页和漂流瓶页面共用
-- 搜索框增加 **300ms 防抖**，减少不必要的界面重绘
-- 数据库操作增加错误处理，异常时通过 SnackBar 提示用户
-- `MemoryService` 加入标签解析、记忆搜索等业务逻辑方法
-- 修复项目名拼写错误（`memory_bootle` → `memory_bottle`）
-- 移除未使用的依赖和组件，清理死代码
-
-### 测试
-
-- 新增 28 个单元测试，覆盖 Memory 模型、日期工具函数、MemoryService
+All notable changes to Memory Bottle (记忆漂流瓶) will be documented in this file.
 
 ---
 
-## v1.0.0 (2026-06-07)
+## [0.1.4] — 2026-06-09
 
-- 首个正式版本
-- 写下记忆 / 查看记忆 / 漂流瓶拾取
-- SQLite 本地存储
-- 时间线分组浏览、搜索和标签筛选
-- Android / Windows 发布
+### Added
+- Cloud sync via Supabase (PostgreSQL + Storage)
+- Email/password account system (sign up / sign in / sign out)
+- Auto-sync: pushes on save/edit/delete, pulls on startup and app resume
+- Image viewer with pinch-to-zoom (0.5x–4.0x)
+- Open document attachments (PDF, TXT, etc.) via system apps
+- Custom app icon across Android, iOS, and Windows
+- App display name "记忆漂流瓶" on all platforms
+- Settings persistence: font and theme preferences survive app restart
+
+### Changed
+- Replace manual cloud upload/download buttons with auto-sync status icon
+- Settings panel uses `Wrap` layout to prevent text overflow
+
+### Fixed
+- Release APK missing `INTERNET` permission causing cloud sync failure
+- Cloud sync deduplication failure due to `DateTime` precision mismatch
+- Package name typo: `memory_bootle` → `memory_bottle` (all platforms)
+- "Follow system" text overflow in settings panel
+- Hero animation `RenderFlex` overflow on card transition
+
+---
+
+## [0.1.3] — 2026-06-08
+
+### Added
+- 12 Chinese fonts: Noto Sans SC, Noto Serif SC, Ma Shan Zheng, Long Cang, ZCOOL XiaoWei, SanJi XingKai, JiZi XingKai, HuiWen ZhengKai, YanShi XiaXingKai, YuWei XingShu, ZCOOL QingKe HuangYou, ZCOOL KuaiLe Ti
+- Settings panel redesign with live font preview
+
+### Fixed
+- Button text not respecting selected font
+- Bottle page animation removed (performance)
+
+---
+
+## [0.1.2] — 2026-06-08
+
+### Added
+- Dark mode: light / dark / follow system
+- Hero animation from list card to detail page
+- Data export: one-tap JSON backup with attachments (base64)
+- Pull-to-refresh on memory list
+- Delete confirmation toast
+
+### Changed
+- Migrated state management to Provider
+- Merged write/edit memory pages (reduced ~120 lines of duplicate code)
+- Extracted shared `MemoryContentCard` widget
+- Added 300ms debounce to search input
+- Improved database error handling with SnackBar feedback
+
+### Added
+- 28 unit tests covering Memory model, date utils, and MemoryService
+
+---
+
+## [0.1.1] — 2026-06-07
+
+### Added
+- Memory list with date-grouped timeline
+- Keyword search and tag filtering
+- Tag input with chip display
+
+---
+
+## [0.1.0] — 2026-06-07
+
+### Added
+- Write memories with content, tags, and custom date
+- Bottle pickup: randomly retrieve past memories
+- Edit and delete memories
+- SQLite local storage
+- Android and Windows release
